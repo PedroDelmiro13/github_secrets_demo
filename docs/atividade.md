@@ -27,7 +27,7 @@ github-secrets-demo/
 │   └── server.js
 ├── .github/
 │   └── workflows/
-│       └── pipeline.yml
+│       └── main.yml
 └── README.md
 ```
 
@@ -41,7 +41,7 @@ process.env.MENSAGEM_SECRETA
 
 ## 3. Situação inicial
 
-Analise o arquivo `pipeline.yml`.
+Analise o arquivo `main.yml`.
 
 Você encontrará uma configuração semelhante a:
 
@@ -108,17 +108,17 @@ Esta mensagem está protegida pelo GitHub Secrets
 Modifique o arquivo:
 
 ```text
-.github/workflows/pipeline.yml
+.github/workflows/main.yml
 ```
 
 Remova o valor que estava definido diretamente no arquivo.
 
 A pipeline deverá utilizar o Secret criado no GitHub.
 
-O acesso ao Secret deverá utilizar a sintaxe:
+Como o Secret desta atividade se chama `MENSAGEM_SECRETA`, use:
 
 ```yaml
-${{ secrets.NOME_DO_SECRET }}
+${{ secrets.MENSAGEM_SECRETA }}
 ```
 
 A aplicação deverá continuar recebendo a informação através da variável de ambiente:
@@ -136,7 +136,7 @@ Verifique se a pipeline é executada corretamente.
 Depois, confirme que:
 
 * a aplicação continua recebendo a mensagem;
-* o arquivo `pipeline.yml` não possui mais o valor real do segredo;
+* o arquivo `main.yml` não possui mais o valor real do segredo;
 * o valor do Secret não foi colocado diretamente no código;
 * o valor sensível não foi exibido nos logs da pipeline.
 
@@ -175,3 +175,28 @@ Além disso, o aluno deverá entregar uma breve documentação contendo:
 Ao final da atividade, você deverá compreender que informações sensíveis podem ser retiradas do código e armazenadas de forma separada no GitHub. Dessa forma, o código não precisa conhecer diretamente o valor do segredo.
 
 A atividade representa uma introdução ao gerenciamento de Secrets em pipelines de CI/CD e servirá como base para utilização de credenciais, tokens, senhas e chaves em projetos posteriores.
+
+## Respostas da atividade
+
+### Problema encontrado
+
+Um valor escrito diretamente no arquivo do workflow fica no histórico do repositório e pode ser visto por quem tem acesso a ele. Se fosse uma senha ou um token real, outras pessoas poderiam usar essa credencial para acessar sistemas ou dados.
+
+O Secret deve ser criado nas configurações do repositório em **Settings → Secrets and variables → Actions**, com o nome `MENSAGEM_SECRETA`. O workflow deve referenciá-lo como `${{ secrets.MENSAGEM_SECRETA }}` e passá-lo à aplicação pela variável de ambiente `MENSAGEM_SECRETA`.
+
+### Respostas às questões
+
+1. Um valor escrito diretamente no `main.yml` fica no histórico do repositório, um GitHub Secret é configurado separadamente e injetado no workflow durante a execução.
+2. O valor é configurado nas configurações do repositório, em **Secrets and variables → Actions**. O nome usado nesta atividade é `MENSAGEM_SECRETA`.
+3. Não. O valor não deve ser colocado no código, a aplicação lê a variável de ambiente `MENSAGEM_SECRETA`.
+4. `process.env.MENSAGEM_SECRETA` lê, no Node.js, o valor da variável de ambiente disponibilizada ao processo.
+5. Secrets permitem usar credenciais no CI/CD sem armazená-las diretamente no código versionado e sem exibi-las intencionalmente nos logs.
+6. Uma senha no arquivo `.yml` poderia permanecer no histórico mesmo após sua remoção e ser acessada por pessoas com acesso ao repositório. Uma senha exposta deve ser revogada e substituída.
+
+### Fluxo e validação
+
+O GitHub armazena o Secret `MENSAGEM_SECRETA`; o GitHub Actions o associa à variável de ambiente de mesmo nome no passo que executa `app/server.js`; a aplicação obtém o valor por `process.env.MENSAGEM_SECRETA`. O workflow é iniciado por um push para qualquer branch ou manualmente pela aba **Actions**, usando **Run workflow**.
+
+![imageem](download3.png)
+![imageem2](download5.png)
+![imageem3](download6.png)
